@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/use-defer/static/css/main.2c6a48fe.chunk.css",
+    "main.js": "/use-defer/static/js/main.59af0f6b.chunk.js",
+    "main.js.map": "/use-defer/static/js/main.59af0f6b.chunk.js.map",
+    "runtime-main.js": "/use-defer/static/js/runtime-main.c31efcbb.js",
+    "runtime-main.js.map": "/use-defer/static/js/runtime-main.c31efcbb.js.map",
+    "static/js/2.6babfc69.chunk.js": "/use-defer/static/js/2.6babfc69.chunk.js",
+    "static/js/2.6babfc69.chunk.js.map": "/use-defer/static/js/2.6babfc69.chunk.js.map",
+    "index.html": "/use-defer/index.html",
+    "precache-manifest.bca7d7522a5de4a140cc74a3ad352b89.js": "/use-defer/precache-manifest.bca7d7522a5de4a140cc74a3ad352b89.js",
+    "service-worker.js": "/use-defer/service-worker.js",
+    "static/css/main.2c6a48fe.chunk.css.map": "/use-defer/static/css/main.2c6a48fe.chunk.css.map",
+    "static/js/2.6babfc69.chunk.js.LICENSE.txt": "/use-defer/static/js/2.6babfc69.chunk.js.LICENSE.txt",
+    "static/js/main.59af0f6b.chunk.js.LICENSE.txt": "/use-defer/static/js/main.59af0f6b.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c31efcbb.js",
+    "static/js/2.6babfc69.chunk.js",
+    "static/css/main.2c6a48fe.chunk.css",
+    "static/js/main.59af0f6b.chunk.js"
+  ]
+}

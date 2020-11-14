@@ -8,30 +8,34 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
 ) => {
   const processesRef = React.useRef(0);
 
-  const [status, setStatus] = React.useState<
-    'idle' | 'pending' | 'success' | 'error'
-  >('idle');
-  const [value, setValue] = React.useState<Value | null>(null);
-  const [error, setError] = React.useState<Error | null>(null);
+  const stateRef = React.useRef<State<Value, Error>>({ status: Status.IDLE });
+  const [state, setState] = React.useState(stateRef.current);
+  const update = (newState: State<Value, Error>) => {
+    stateRef.current = newState;
+    setState(newState);
+  };
 
   const execute = React.useCallback((...args: Args) => {
     ++processesRef.current;
-
-    setStatus('pending');
-    setError(null);
+    update({
+      ...stateRef.current,
+      status: Status.PENDING
+    });
 
     return defer(...args)
       .then((response: Value) => {
-        if (!--processesRef.current) {
-          setStatus('success');
-        }
-        setValue(response);
+        update({
+          status: --processesRef.current ? stateRef.current.status : Status.SUCCESS,
+          value: response,
+        });
         return response;
       })
       .catch((error: Error) => {
         if (!--processesRef.current) {
-          setStatus('error');
-          setError(error);
+          update({
+            status: Status.ERROR,
+            error,
+          })
         }
         return Promise.reject(error);
       });
@@ -43,8 +47,20 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
     }
   }, [execute, ...(immediateArgs || [])]);
 
-  return { execute, status, value, error };
+  return { ...state, execute };
 };
 
-
 export default useDefer;
+
+export enum Status {
+  IDLE = 'idle',
+  PENDING = 'pending',
+  SUCCESS = 'success',
+  ERROR = 'error',
+};
+
+interface State<Value, Error> {
+  status: Status,
+  value?: Value | undefined,
+  error?: Error | undefined,
+};

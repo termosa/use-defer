@@ -1,28 +1,64 @@
 import React from 'react'
+import SingleFunctionExample, { code as singleFunctionExampleCode } from './SingleFunctionExample';
+import MultipleFunctionsExample, { code as multipleFunctionsExampleCode } from './MultipleFunctionsExample';
+import { version } from 'use-defer/package.json';
 
-import useDefer from 'use-defer'
+/** @type {React.CSSProperties} */
+const exampleStyles = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  padding: '2em',
+  margin: '2em',
+  border: '2px solid lightgray',
+};
 
-const generateNumber = max => new Promise((resolve, reject) => {
-  if (max > 0) setTimeout(resolve, 2e3, Math.round(Math.random() * max));
-  else setTimeout(reject, 2e3, 'Max value must be greater than zero');
-});
+/** @type {React.CSSProperties} */
+const titleStyles = {
+  width: '100%',
+  textAlign: 'center',
+};
 
-const defaultMax = 100;
+/** @type {React.CSSProperties} */
+const codeStyles = {
+  flex: 1,
+};
 
-const App = () => {
-  const [max, setMax] = React.useState('');
+/** @type {React.CSSProperties} */
+const previewStyles = {
+  display: 'flex',
+  alignItems: 'center',
+  paddingLeft: '2em',
+  borderLeft: '1px solid lightgray',
+  width: '260px',
+};
 
-  const { value, error, status } = useDefer(generateNumber, [max], [max ? +max : defaultMax]);
+/** @type {React.CSSProperties} */
+const linkStyles = {
+  color: '#444',
+};
 
-  return (
-    <div>
-      <div>
-        <input type="number" value={max} placeholder={defaultMax.toString()} onChange={e => setMax(e.target.value)} />
-        {status === 'pending' ? <span> Processing request</span> : null}
-      </div>
-      {value !== null ? <div>Last result: {value}</div> : null}
-      {error !== null ? <div>Error: {error}</div> : null}
-    </div>
-  )
-}
-export default App
+const githubExampleDirLink = 'https://github.com/termosa/use-defer/blob/master/example';
+
+const Example = ({ title, code, path, children }) => (
+  <div style={exampleStyles}>
+    <h2 style={titleStyles}>
+      <a href={`${githubExampleDirLink}${path}`} style={linkStyles}>Example: {title}</a>
+    </h2>
+    <pre style={codeStyles}>{code}</pre>
+    <div style={previewStyles}>{children}</div>
+  </div>
+);
+
+const App = () => (
+  <React.Fragment>
+    <h1 style={titleStyles}>use-defer@{version}</h1>
+    <Example title="Single Request" code={singleFunctionExampleCode} path="/src/SingleFunctionExample.js">
+      <SingleFunctionExample />
+    </Example>
+    <Example title="Multiple Requests" code={multipleFunctionsExampleCode} path="/src/MultipleFunctionsExample.js">
+      <MultipleFunctionsExample />
+    </Example>
+  </React.Fragment>
+);
+
+export default App;

@@ -15,9 +15,32 @@ npm install --save use-defer
 ```tsx
 import * as React from 'react'
 
-import useDefer from 'use-defer'
-// Or: import { useDefer } from 'use-defer'
+import useDefer, { Status } from 'use-defer'
+// Or: import { useDefer, Status } from 'use-defer'
 
+const Example = () => {
+  const {
+    execute, // Callback for the [asyncFunction] with the same arguments list and result
+    status,  // One of: Status.IDLE - no request, Status.PENDING - waiting for results, Status.SUCCESS & Status.ERROR
+    value,   // Result of the last request
+    error,   // Error thrown during the execution of the last request
+  } = useDefer(
+    asyncFunction, // The function that returns a [Promise] instance
+    [],            // Optional list of [React.DependencyList] type to update [asyncFunction]
+    [],            // Optional arguments list. The [asyncFunction] will be called immediately if this is set
+  );
+
+  // ...
+};
+```
+
+## Examples
+
+### Using it for a single async function
+
+[Source code](https://github.com/termosa/use-defer/blob/master/example/src/SingleFunctionExample.js)
+
+```tsx
 const generateNumber = max => new Promise((resolve, reject) => {
   if (max > 0) setTimeout(resolve, 2e3, Math.round(Math.random() * max));
   else setTimeout(reject, 2e3, 'Max value must be greater than zero');
@@ -25,22 +48,80 @@ const generateNumber = max => new Promise((resolve, reject) => {
 
 const defaultMax = 100;
 
-const Example = () => {
+const SingleFunctionExample = () => {
   const [max, setMax] = React.useState('');
 
-  const { value, error, status } = useDefer(generateNumber, [max], [max ? +max : defaultMax]);
+  const { value, error, status } = useDefer(
+    generateNumber,           // Async function that returns promise
+    [max],                    // Dependencies
+    [max ? +max : defaultMax] // Initial arguments
+  );
 
   return (
     <div>
       <div>
-        <input type="number" value={max} placeholder={defaultMax.toString()} onChange={e => setMax(e.target.value)} />
-        {status === 'pending' ? <span> Processing request</span> : null}
+        <input
+          type="number"
+          value={max}
+          placeholder={defaultMax.toString()}
+          onChange={e => setMax(e.target.value)}
+        />
+        {status === 'pending' ? <span>processing </span> : null}
       </div>
-      {value !== null ? <div>Last result: {value}</div> : null}
-      {error !== null ? <div>Error: {error}</div> : null}
+      {value !== undefined ? <div>Last result: {value}</div> : null}
+      {error ? <div>Error: {error}</div> : null}
     </div>
-  )
-}
+  );
+};
+```
+
+### Create a model hook with auto reloading
+
+[Source code](https://github.com/termosa/use-defer/blob/master/example/src/MultipleFunctionsExample.js)
+
+```tsx
+const useResources = () => {
+  const { execute: reload, value: resources, status } = useDefer(api.get, [], []);
+  const { execute: create } = useDefer(resource => api.post(resource).then(reload));
+  const { execute: remove } = useDefer(id => api.delete(id).then(reload));
+
+  return { resources, status, create, remove };
+};
+
+const MultipleFunctionsExample = () => {
+  const resourceLabelRef = useRef(null);
+  const { resources, status, create, remove } = useResources();
+
+  const onSubmit = e => {
+    e.preventDefault();
+    create({ label: resourceLabelRef.current.value });
+    resourceLabelRef.current.value = '';
+  };
+
+  return (
+    <div>
+      <form onSubmit={onSubmit}>
+        <input type="text" ref={resourceLabelRef} required />
+        <input type="submit" value="Add" />
+      </form>
+
+      {!resources && status === 'pending' ? <p>Loading...</p> : null}
+
+      {resources
+        ? <ol>
+          {resources.map(res => (
+            <li key={res.id}>
+              {res.label}
+              {' '}
+              <input type="button" onClick={() => remove(res.id)} value="remove" />
+            </li>
+          ))}
+        </ol>
+        : null
+      }
+    </div>
+  );
+};
 ```
 
 ## License

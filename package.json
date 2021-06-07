@@ -1,6 +1,6 @@
 {
   "name": "use-defer",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Simplify work with async functions with memoization and state",
   "author": "termosa",
   "license": "MIT",

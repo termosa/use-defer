@@ -15,6 +15,8 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
     setState(newState);
   };
 
+  const reset = () => update({ status: Status.IDLE });
+
   const execute = React.useCallback((...args: Args) => {
     ++processesRef.current;
     update({
@@ -47,7 +49,7 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
     }
   }, [execute, ...(immediateArgs || [])]);
 
-  return { ...state, execute };
+  return { ...state, reset, execute };
 };
 
 export default useDefer;

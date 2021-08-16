@@ -2,7 +2,7 @@
 import * as React from 'react';
 
 export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
-  defer: (...args: Args) => Promise<Value>,
+  defer: (...args: Args) => Promise<Value> | Value,
   deps: React.DependencyList = [],
   immediateArgs?: Args,
 ) => {
@@ -24,15 +24,15 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
       status: Status.PENDING
     });
 
-    return defer(...args)
-      .then((response: Value) => {
+    return new Promise<Value>(resolve => resolve(defer(...args))).then(
+      (response: Value) => {
         update({
           status: --processesRef.current ? stateRef.current.status : Status.SUCCESS,
           value: response,
         });
         return response;
-      })
-      .catch((error: Error) => {
+      },
+      (error: Error) => {
         if (!--processesRef.current) {
           update({
             status: Status.ERROR,
@@ -40,12 +40,13 @@ export const useDefer = <Value, Error = string, Args extends any[] = any[]>(
           })
         }
         return Promise.reject(error);
-      });
+      }
+    );
   }, deps);
 
   React.useEffect(() => {
     if (immediateArgs) {
-      execute(...immediateArgs);
+      execute(...immediateArgs).catch(() => {/* To prevent uncaught promise error message */});
     }
   }, [execute, ...(immediateArgs || [])]);
 
@@ -61,8 +62,13 @@ export enum Status {
   ERROR = 'error',
 };
 
-interface State<Value, Error> {
+export interface State<Value, Error> {
   status: Status,
   value?: Value | undefined,
   error?: Error | undefined,
 };
+
+export interface Defer<Value, Error = string, Args extends any[] = any[]> extends State<Value, Error> {
+  reset(): void
+  execute(...args: Args): Promise<Value>
+}

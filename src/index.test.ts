@@ -106,6 +106,26 @@ describe('useDefer', () => {
     expect(result.current.error).toBe('Cannot divide by zero');
   });
 
+  it('works without promise', async () => {
+    const { result } = renderHook(() => useDefer(() => 42, [], []));
+
+    await act(() => Promise.resolve());
+
+    expect(result.current.status).toBe(Status.SUCCESS);
+    expect(result.current.value).toBe(42);
+    expect(result.current.error).toBe(undefined);
+  });
+
+  it('catches errors thrown in the defer function', async () => {
+    const { result } = renderHook(() => useDefer(() => Promise.reject('failure'), [], []));
+
+    await act(() => Promise.resolve());
+
+    expect(result.current.status).toBe(Status.ERROR);
+    expect(result.current.value).toBe(undefined);
+    expect(result.current.error).toBe('failure');
+  });
+
   it('initiates request immediately', async () => {
     const { result } = renderHook(() => useDefer(asyncDivision, [], [6, 2]));
 
